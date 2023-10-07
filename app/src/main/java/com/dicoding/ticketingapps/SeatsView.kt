@@ -6,6 +6,8 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.Rect
 import android.util.AttributeSet
+import android.view.KeyEvent.ACTION_DOWN
+import android.view.MotionEvent
 import android.view.View
 import androidx.core.content.res.ResourcesCompat
 
@@ -76,6 +78,12 @@ class SeatsView: View {
         for (seat in seats) {
             drawSeat(canvas, seat)
         }
+
+        val text = "Silakan Pilih Kursi"
+        titlePaint.apply {
+            textSize = 50F
+        }
+        canvas?.drawText(text, (width / 2F) - 197F, 100F, titlePaint)
     }
 
     private fun drawSeat(canvas: Canvas?, seat: Seat) {
@@ -127,5 +135,43 @@ class SeatsView: View {
 
         // Mengembalikan ke pengaturan sebelumnya
         canvas?.restore()
+    }
+
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        val halfOfHeight = height / 2
+        val halfOfWidth = width / 2
+
+        val widthColumnOne = (halfOfWidth - 300F)..(halfOfWidth - 100F)
+        val widthColumnTwo = (halfOfWidth + 100F)..(halfOfWidth + 300F)
+
+        val heightRowOne = (halfOfHeight - 600F)..(halfOfHeight - 400F)
+        val heightRowTwo = (halfOfHeight - 300F)..(halfOfHeight - 100F)
+        val heightRowTree = (halfOfHeight + 0F)..(halfOfHeight + 200F)
+        val heightRowFour =(halfOfHeight + 300F)..(halfOfHeight + 500F)
+
+        if (event?.action == ACTION_DOWN) {
+            when {
+                event.x in widthColumnOne && event.y in heightRowOne -> booking(0)
+                event.x in widthColumnTwo && event.y in heightRowOne -> booking(1)
+                event.x in widthColumnOne && event.y in heightRowTwo -> booking(2)
+                event.x in widthColumnTwo && event.y in heightRowTwo -> booking(3)
+                event.x in widthColumnOne && event.y in heightRowTree -> booking(4)
+                event.x in widthColumnTwo && event.y in heightRowTree -> booking(5)
+                event.x in widthColumnOne && event.y in heightRowFour -> booking(6)
+                event.x in widthColumnTwo && event.y in heightRowFour -> booking(7)
+            }
+        }
+        return true
+    }
+
+    private fun booking(position: Int) {
+        for (seat in seats) {
+            seat.isBooked = false
+        }
+        seats[position].apply {
+            seat = this
+            isBooked = true
+        }
+        invalidate()
     }
 }
